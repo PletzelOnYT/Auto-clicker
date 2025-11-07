@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Auto Clicker</title>
+    <style>
+      body { font-family: Arial; padding: 10px; width: 200px; }
+      button { margin-top: 5px; width: 100%; }
+    </style>
+  </head>
+  <body>
+    <h3>Auto Clicker</h3>
+    <input type="number" id="interval" placeholder="Interval (ms)" value="1000">
+    <button id="start">Start Clicking</button>
+    <button id="stop">Stop Clicking</button>
+    <script>
+      const startBtn = document.getElementById("start");
+      const stopBtn = document.getElementById("stop");
+
+      startBtn.onclick = async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const interval = parseInt(document.getElementById("interval").value, 10);
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: startAutoClicker,
+          args: [interval]
+        });
+      };
+
+      stopBtn.onclick = async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: stopAutoClicker
+        });
+      };
+
+      function startAutoClicker(interval) {
+        window.autoClickerInterval = setInterval(() => {
+          const el = document.querySelector(":hover") || document.activeElement;
+          if (el) el.click();
+        }, interval);
+      }
+
+      function stopAutoClicker() {
+        clearInterval(window.autoClickerInterval);
+      }
+    </script>
+  </body>
+</html>
